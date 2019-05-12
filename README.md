@@ -2,7 +2,7 @@
 PyTorch implementation of MADE for MNIST
 
 ## Description
-This is implementation of Masked Autoencoder for Distribution Estimation(MADE). To facilitate sampling numbers, I used one-hot encoding of numbers as additional input. The shape of input is batch size * 794 (not 784). This implementation includes direct connection between input and output and connectivity-agnostic trainint. But i didn't implement order-agonostic training.
+This is implementation of Masked Autoencoder for Distribution Estimation(MADE). To facilitate sampling numbers, I used one-hot encoding of numbers as additional input. The shape of input is batch size * 794 (not 784). This implementation includes direct connection between input and output and connectivity-agnostic training. But i didn't implement order-agonostic training.
 
 ## Results
 The following results were obtained with the default setting. (command: python made.py)
@@ -13,8 +13,8 @@ The following results were obtained with the default setting. (command: python m
 <td> Sampling </td>
 </tr>
 <tr>
-<td><img src = 'results/reconstruction_20.png' width = '500px'>
-<td><img src = 'results/sample_20.png' width = '500px'>
+<td><img src = 'results/reconstruction_20.png' width = '500px'></td>
+<td><img src = 'results/sample_20.png' width = '500px'></td>
 </tr>
 </table>
 

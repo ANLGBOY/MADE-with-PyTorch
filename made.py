@@ -20,10 +20,10 @@ parser.add_argument('--epochs', type=int, default=20,
                     help='number of epochs to train (default: 20)')
 parser.add_argument('--learning-rate', type=int, default=5e-3,
                     help='learning rate for Adam optimizer (default: 5e-3)')
-parser.add_argument('--z1-dim', type=int, default=500,
-                    help='dimension of hidden variable Z1 (default: 500)')
-parser.add_argument('--z2-dim', type=int, default=300,
-                    help='dimension of hidden variable Z (default: 300)')
+parser.add_argument('--z1-dim', type=int, default=400,
+                    help='dimension of hidden variable Z1 (default: 400)')
+parser.add_argument('--z2-dim', type=int, default=200,
+                    help='dimension of hidden variable Z (default: 200)')
 parser.add_argument('--log-interval', type=int, default=50,
                     help='interval between logs about training status (default: 50)')
 parser.add_argument('--make-image-interval', type=int, default=5,
