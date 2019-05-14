@@ -4,6 +4,7 @@ from torch import nn, optim
 from torch.nn import functional as F
 from torchvision import datasets, transforms
 from torchvision.utils import save_image
+from torch.distributions import Bernoulli
 
 import argparse
 import os
@@ -16,14 +17,20 @@ parser = argparse.ArgumentParser(
     description="PyTorch implementation of MADE for MNIST")
 parser.add_argument('--batch-size', type=int, default=128,
                     help='batch size for training (default: 128)')
-parser.add_argument('--epochs', type=int, default=20,
-                    help='number of epochs to train (default: 20)')
-parser.add_argument('--learning-rate', type=int, default=5e-3,
-                    help='learning rate for Adam optimizer (default: 5e-3)')
-parser.add_argument('--z1-dim', type=int, default=400,
-                    help='dimension of hidden variable Z1 (default: 400)')
-parser.add_argument('--z2-dim', type=int, default=200,
-                    help='dimension of hidden variable Z (default: 200)')
+parser.add_argument('--epochs', type=int, default=70,
+                    help='number of epochs to train (default: 70)')
+parser.add_argument('--learning-rate', type=int, default=1e-3,
+                    help='learning rate for Adam optimizer (default: 1e-3)')
+parser.add_argument('--weight-decay', type=int, default=1e-4,
+                    help='weight decay for Adam optimizer (default: 1e-4)')
+parser.add_argument('--step-size', type=int, default=45,
+                    help='step size for scheduler (default: 45)')
+parser.add_argument('--gamma', type=int, default=0.1,
+                    help='gamma for schduler (default: 0.1)')
+parser.add_argument('--z1-dim', type=int, default=500,
+                    help='dimension of hidden variable Z1 (default: 500)')
+parser.add_argument('--z2-dim', type=int, default=350,
+                    help='dimension of hidden variable Z (default: 350)')
 parser.add_argument('--log-interval', type=int, default=50,
                     help='interval between logs about training status (default: 50)')
 parser.add_argument('--make-image-interval', type=int, default=5,
@@ -33,6 +40,9 @@ args = parser.parse_args()
 BATCH_SIZE = args.batch_size
 EPOCHS = args.epochs
 LR = args.learning_rate
+WEIGHT_DECAT = args.weight_decay
+STEP_SIZE = args.step_size
+GAMMA = args.gamma
 INPUT_DIM = 794  # image(1*28*28) with label(1-hot encoding)
 Z1_DIM = args.z1_dim
 Z2_DIM = args.z2_dim
@@ -113,8 +123,8 @@ class MADE(nn.Module):
 
 
 model = MADE().to(device)
-optimizer = optim.Adam(model.parameters(), lr=LR)
-
+optimizer = optim.Adam(model.parameters(), lr=LR,weight_decay=WEIGHT_DECAT)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=STEP_SIZE, gamma=GAMMA)
 
 # --- defines the loss function --- #
 def loss_function(recon_x, x):
@@ -231,19 +241,21 @@ def sample_M():
 
 def sample_image_from_model(epoch):
     model.eval()
-    num_sample = 10
+    num_sample = 80
 
     sample_input = torch.rand(num_sample, 784).to(device)
     labels = torch.zeros(num_sample, 10).to(device)
 
     for i in range(num_sample):
-        labels[i][i] = 1
+        labels[i][i%10] = 1
 
     sample_input = torch.cat((labels, sample_input), dim=1)
     with torch.no_grad():
-        for i in range(10, 794-1):
-                temp = model(sample_input, MW0, MW1, MW2, MV, MA)
-                sample_input[:, 10:i+1] = temp[:, :i+1-10]
+        for i in range(10, 794):
+                output = model(sample_input, MW0, MW1, MW2, MV, MA)
+                dist = Bernoulli(output[:,i-10])
+                sample_output = dist.sample()
+                sample_input[:, i] = sample_output
     sample = sample_input[:, 10:].cpu().view(num_sample, 1, 28, 28)
     save_generated_img(sample, 'sample', epoch, 10)
 
@@ -252,6 +264,7 @@ def sample_image_from_model(epoch):
 if __name__ == '__main__':
     sample_M()
     for epoch in range(1, EPOCHS + 1):
+        scheduler.step(epoch)
         train(epoch)
         test(epoch)
         if epoch % MAKE_IMAGE_INTERVAL == 0:

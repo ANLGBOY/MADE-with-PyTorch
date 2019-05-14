@@ -13,8 +13,8 @@ The following results were obtained with the default setting. (command: python m
 <td> Sampling </td>
 </tr>
 <tr>
-<td><img src = 'results/reconstruction_20.png' width = '500px'></td>
-<td><img src = 'results/sample_20.png' width = '500px'></td>
+<td><img src = 'results/reconstruction_70.png' width = '500px'></td>
+<td><img src = 'results/sample_70.png' width = '500px'></td>
 </tr>
 </table>
 
